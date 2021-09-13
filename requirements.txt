@@ -1,0 +1,6 @@
+dash
+pandas
+numpy
+dash-cytoscape
+dash
+dash_bootstrap_components
