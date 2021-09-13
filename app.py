@@ -1,10 +1,11 @@
 import math
 import dash
-import dash_bootstrap_components as dbc
-import dash_core_components as dcc
+import plotly.express as px
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 import dash_cytoscape as cyto
-import dash_html_components as html
 import plotly.graph_objs as go
 import io
 from pathlib import Path
@@ -14,7 +15,6 @@ import numpy as np
 import xml.etree.ElementTree as ET
 import base64
 import zlib
-
 
 
 class Diagram:
@@ -42,16 +42,9 @@ class Diagram:
     # def get_page_list(self):
     #     return self.page_list
 
+app = dash.Dash(external_stylesheets=[dbc.themes.LUX])
 
-# global tree
-app = dash.Dash(
-    __name__,
-    meta_tags=[{"name": "viewport", "content": "width=device-width"}],
-    # external_stylesheets=dbc.themes.BOOTSTRAP
-)
-server = app.server
-
-colors = {"graphBackground": "#F5F5F5", "background": "#ffffff", "text": "#000000"}
+# colors = {"graphBackground": "#F5F5F5", "background": "#ffffff", "text": "#000000"}
 PATH = Path(__file__).parent
 DATA_PATH = PATH.joinpath("data").resolve()
 
@@ -61,178 +54,191 @@ diagram = Diagram(Path('./data/ieee123.drawio'))
 figure = go.Figure(
                 data=[
                     go.Scatter(
-                        x=np.array(range(0, 10)),
-                        y=np.array(range(0, 10)),
+                        x=np.array([]),
+                        y=np.array([]),
                         mode='lines+markers')
                     ],
                 layout=go.Layout(
-                    plot_bgcolor=colors["graphBackground"],
-                    paper_bgcolor=colors["graphBackground"]
+                    height=250,
+                    margin={'t': 15, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"]
                 ))
-global volt_df
-stylesheet = [
-    {
-        "selector": ".nonterminal",
-        "style": {
-            "label": "data(confidence)",
-            "background-opacity": 0,
-            "text-halign": "left",
-            "text-valign": "top",
-        },
-    },
-    {"selector": ".support", "style": {"background-opacity": 0}},
-    {
-        "selector": "edge",
-        "style": {
-            "source-endpoint": "inside-to-node",
-            "target-endpoint": "inside-to-node",
-        },
-    },
-    {
-        "selector": ".terminal",
-        "style": {
-            "label": "data(name)",
-            "width": 10,
-            "height": 10,
-            "text-valign": "center",
-            "text-halign": "right",
-            "background-color": "#222222",
-        },
-    },
-]
+global df1
+global df2
+global df3
+# stylesheet = [
+#     {
+#         "selector": ".nonterminal",
+#         "style": {
+#             "label": "data(confidence)",
+#             "background-opacity": 0,
+#             "text-halign": "left",
+#             "text-valign": "top",
+#         },
+#     },
+#     {"selector": ".support", "style": {"background-opacity": 0}},
+#     {
+#         "selector": "edge",
+#         "style": {
+#             "source-endpoint": "inside-to-node",
+#             "target-endpoint": "inside-to-node",
+#         },
+#     },
+#     {
+#         "selector": ".terminal",
+#         "style": {
+#             "label": "data(name)",
+#             "width": 10,
+#             "height": 10,
+#             "text-valign": "center",
+#             "text-halign": "right",
+#             "background-color": "#222222",
+#         },
+#     },
+# ]
 
 app.layout = html.Div(
     [
-        html.Img(className="logo", src=app.get_asset_url("dash-logo.png")),
-        html.Div(
-            className="header",
-            children=[
-                html.Div(
-                    className="div-info",
-                    children=[
-                        html.H2(className="title", children="GridLAB-D Interface"),
-                        html.P(
-                            """
-                            Dash Cytoscape is a graph visualization component for creating easily customizable,
-                            high-performance interactive, and web-based networks.
-                            """
+        dbc.Row(
+            dbc.Col(
+                [
+                    html.Div(
+                        # className="header",
+                        children=[
+                            html.Div(
+                                className="div-info",
+                                children=[
+                                    html.H2(
+                                        # className="title",
+                                        children="GridLAB-D Results Viewer"),
+                                    # html.P(
+                                    #     """
+                                    #     Dash Cytoscape is a graph visualization component for creating easily customizable,
+                                    #     high-performance interactive, and web-based networks.
+                                    #     """
+                                    # ),
+                                    # html.A(
+                                    #     children=html.Button("Run Model", id='run_model', className="button"),
+                                    #     # href="https://www.gridlabd.org/index.stm",
+                                    #     target="_blank",
+                                    # ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+                width={'size': 5, 'offset': 1}
+            )
+        ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        dbc.Row(
+                            [
+                                # dbc.Col(dbc.Row(html.H4("Network")), width='auto'),
+                                dbc.Col(dbc.Card(
+                                    [
+                                        dcc.Upload(
+                                            id='import_diagram',
+                                            children=html.Div(['Select Diagram: ', html.A('file')]),
+                                            # Allow multiple files to be uploaded
+                                            multiple=False
+                                        ),
+                                    ]
+                                ), width='auto'),
+                            ]
                         ),
-                        html.A(
-                            children=html.Button("Run Model", id='run_model', className="button"),
-                            # href="https://www.gridlabd.org/index.stm",
-                            target="_blank",
+                        dcc.Dropdown(
+                            id='page_list',
+                            options=diagram.page_list,
+                            value=list(diagram.page_list[0].values())[0]
                         ),
-                        dcc.Upload(
-                            id='import_diagram',
-                            children=html.Div(['Select Diagram: ', html.A('diagram')]),
+                        cyto.Cytoscape(
+                            id="cytoscape",
+                            elements=diagram.elements,
+                            # stylesheet=stylesheet,
+                            layout={"name": "preset", "fit": True, "animate": True},
                             style={
-                                    'width': '25%',
-                                    'height': '25px',
-                                    'lineHeight': '30px',
-                                    'borderWidth': '1px',
-                                    'borderStyle': 'dashed',
-                                    'borderRadius': '5px',
-                                    'textAlign': 'center'
-                                    },
-                            # Allow multiple files to be uploaded
-                            multiple=False
-                        ),
-                        dcc.Upload(
-                            id='import_data',
-                            children=html.Div(['Select Node Data: ', html.A('file')]),
-                            style={
-                                    'width': '25%',
-                                    'height': '25px',
-                                    'lineHeight': '30px',
-                                    'borderWidth': '1px',
-                                    'borderStyle': 'dashed',
-                                    'borderRadius': '5px',
-                                    'textAlign': 'center'
-                                    },
-                            # Allow multiple files to be uploaded
-                            multiple=False
+                                "height": "650px",
+                                "width": "100%",
+                                "backgroundColor": "white",
+                                "margin": "auto",
+                            },
+                            minZoom=0.3,
                         ),
                     ],
+                    width={'size': 5, 'offset': 1}
                 ),
-                html.H4("Network"),
-                dcc.Dropdown(
-                    id='page_list',
-                    options=diagram.page_list,
-                    value=list(diagram.page_list[0].values())[0]
-                ),
-                cyto.Cytoscape(
-                    id="cytoscape",
-                    elements=diagram.elements,
-                    # stylesheet=stylesheet,
-                    layout={"name": "preset", "fit": True, "animate": True},
-                    style={
-                        "height": "650px",
-                        "width": "100%",
-                        "backgroundColor": "white",
-                        "margin": "auto",
-                    },
-                    minZoom=0.45,
-                ),
-                dbc.Row(
+                dbc.Col(
                     [
-                        dbc.Alert(
-                            id="node-data",
-                            children="Click on a node to see its details here",
-                            color="secondary",
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        dcc.Upload(
+                                            id='import_data1',
+                                            children=html.Div(['Select Node Data for Graph 1: ', html.A('file')]),
+                                            multiple=False
+                                        ),
+                                        dcc.Graph(
+                                            id="node_graph1",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
                         ),
-                        dcc.Graph(
-                            id="node_graph",
-                            figure=go.Figure(
-                                data=[
-                                    go.Scatter(
-                                        x=np.array(range(0, 10)),
-                                        y=np.array(range(0, 10)),
-                                        mode='lines+markers')
-                                ],
-                                layout=go.Layout(
-                                    plot_bgcolor=colors["graphBackground"],
-                                    paper_bgcolor=colors["graphBackground"]
-                                ))
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        dcc.Upload(
+                                            id='import_data2',
+                                            children=html.Div(['Select Node Data for Graph 2: ', html.A('file')]),
+                                            multiple=False
+                                        ),
+                                        dcc.Graph(
+                                            id="node_graph2",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
                         ),
-                        dcc.Graph(
-                            id="edge_graph",
-                            figure=go.Figure(
-                                data=[
-                                    go.Scatter(
-                                        x=np.array(range(0, 10)),
-                                        y=np.array(range(0, 10)),
-                                        mode='lines+markers')
-                                ],
-                                layout=go.Layout(
-                                    plot_bgcolor=colors["graphBackground"],
-                                    paper_bgcolor=colors["graphBackground"]
-                                ))
-                        )
-                    ]
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        dcc.Upload(
+                                            id='import_data3',
+                                            children=html.Div(['Select Node Data for Graph 3: ', html.A('file')]),
+                                            multiple=False
+                                        ),
+                                        dcc.Graph(
+                                            id="node_graph3",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
+                        ),
+                    ],
+                    width="5"
                 ),
-            ],
+            ]
         ),
     ]
 )
 
 
-# @app.callback(
-#     Output("cytoscape", "stylesheet"), [Input("cytoscape", "mouseoverEdgeData")]
-# )
-# def color_children(edgeData):
-#     if edgeData is None:
-#         return stylesheet
-#
-#     if "s" in edgeData["source"]:
-#         val = edgeData["source"].split("s")[0]
-#     else:
-#         val = edgeData["source"]
-#
-#     children_style = [
-#         {"selector": f'edge[source *= "{val}"]', "style": {"line-color": "#3ed6d2"}}
-#     ]
-#
-#     return stylesheet + children_style
 
 @app.callback(
     Output("node-data", "children"), [Input("cytoscape", "selectedNodeData")]
@@ -292,6 +298,20 @@ def upload_diagram(contents):
     else:
         return diagram.page_list
 
+
+@app.callback(
+    Output('import_diagram', 'children'),
+    [
+    Input('import_diagram', 'filename'),
+    ]
+)
+def update_upload_text(filename):
+    if filename is not None:
+        return html.Div(['Select Diagram: ', html.A(filename)])
+    else:
+        return html.Div(['Select Diagram: ', html.A('file')])
+
+
 @app.callback(
     Output("cytoscape", "elements"),
     [Input("page_list", "value")]
@@ -322,18 +342,18 @@ def parse_data(contents, filename):
 
 
 @app.callback(
-    Output('node_graph', 'figure'), [
+    Output('node_graph1', 'figure'), [
     Input("cytoscape", "selectedNodeData")
     ]
 )
-def update_graph(nodedata):
-    if nodedata is not None and volt_df is not None:
+def update_graph1(nodedata):
+    if nodedata is not None and df1 is not None:
         if len(nodedata) > 0:
             fig_data = []
             for data in nodedata:
                 node_name = data["label"]
-                df = volt_df
-                y=np.array(df[f'node_{node_name}'])
+                df = df1
+                y = np.array(df[f'node_{node_name}'])
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
@@ -345,26 +365,29 @@ def update_graph(nodedata):
             return go.Figure(
                 fig_data,
                 layout=go.Layout(
-                    plot_bgcolor=colors["graphBackground"],
-                    paper_bgcolor=colors["graphBackground"],
+                    height=250,
+                    margin={'t': 15, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
                     showlegend=True
                 )
             )
     return figure
 
+
 @app.callback(
-    Output('edge_graph', 'figure'), [
-    Input("cytoscape", "selectedEdgeData")
+    Output('node_graph2', 'figure'), [
+    Input("cytoscape", "selectedNodeData")
     ]
 )
-def update_graph(nodedata):
-    if nodedata is not None and volt_df is not None:
+def update_graph2(nodedata):
+    if nodedata is not None and df2 is not None:
         if len(nodedata) > 0:
             fig_data = []
             for data in nodedata:
                 node_name = data["label"]
-                df = volt_df
-                y=np.array(df[f'node_{node_name}'])
+                df = df2
+                y = np.array(df[f'node_{node_name}'])
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
@@ -376,30 +399,132 @@ def update_graph(nodedata):
             return go.Figure(
                 fig_data,
                 layout=go.Layout(
-                    plot_bgcolor=colors["graphBackground"],
-                    paper_bgcolor=colors["graphBackground"],
+                    height=250,
+                    margin={'t': 15, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
                     showlegend=True
                 )
             )
     return figure
 
+
 @app.callback(
-    Output('import_data', 'children'),
+    Output('node_graph3', 'figure'), [
+    Input("cytoscape", "selectedNodeData")
+    ]
+)
+def update_graph3(nodedata):
+    if nodedata is not None and df3 is not None:
+        if len(nodedata) > 0:
+            fig_data = []
+            for data in nodedata:
+                node_name = data["label"]
+                df = df3
+                y = np.array(df[f'node_{node_name}'])
+                x = np.array(range(0, len(y)))
+                fig_data.append(
+                    go.Scatter(
+                        x=x,
+                        y=y,
+                        name=node_name,
+                        mode='lines+markers')
+                )
+            return go.Figure(
+                fig_data,
+                layout=go.Layout(
+                    height=250,
+                    margin={'t': 15, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
+                    showlegend=True
+                )
+            )
+    return figure
+
+
+# @app.callback(
+#     Output('edge_graph', 'figure'), [
+#     Input("cytoscape", "selectedEdgeData")
+#     ]
+# )
+# def update_graph_edge(edge_data):
+#     if edge_data is not None and volt_df is not None:
+#         if len(edge_data) > 0:
+#             fig_data = []
+#             for data in edge_data:
+#                 edge_name = data["label"]
+#                 df = volt_df
+#                 y = np.array(df[f'node_{edge_name}'])
+#                 x = np.array(range(0, len(y)))
+#                 fig_data.append(
+#                     go.Scatter(
+#                         x=x,
+#                         y=y,
+#                         name=edge_name,
+#                         mode='lines+markers')
+#                 )
+#             return go.Figure(
+#                 fig_data,
+#                 layout=go.Layout(
+#                     plot_bgcolor=colors["graphBackground"],
+#                     paper_bgcolor=colors["graphBackground"],
+#                     showlegend=True
+#                 )
+#             )
+#     return figure
+
+@app.callback(
+    Output('import_data1', 'children'),
     [
-    Input('import_data', 'contents'),
-    Input('import_data', 'filename'),
+    Input('import_data1', 'contents'),
+    Input('import_data1', 'filename'),
     ]
 )
-def import_data(contents, filename):
+def import_data1(contents, filename):
     if contents is not None:
         contents = contents
         filename = filename
-        global volt_df
-        volt_df = parse_data(contents, filename)
+        global df1
+        df1 = parse_data(contents, filename)
         return html.Div(['Select Node Data: ', html.A(filename)])
     else:
         return html.Div(['Select Node Data: ', html.A('file')])
 
+@app.callback(
+    Output('import_data2', 'children'),
+    [
+    Input('import_data2', 'contents'),
+    Input('import_data2', 'filename'),
+    ]
+)
+def import_data2(contents, filename):
+    if contents is not None:
+        contents = contents
+        filename = filename
+        global df2
+        df2 = parse_data(contents, filename)
+        return html.Div(['Select Node Data: ', html.A(filename)])
+    else:
+        return html.Div(['Select Node Data: ', html.A('file')])
+
+
+@app.callback(
+    Output('import_data3', 'children'),
+    [
+    Input('import_data3', 'contents'),
+    Input('import_data3', 'filename'),
+    ]
+)
+def import_data3(contents, filename):
+    if contents is not None:
+        contents = contents
+        filename = filename
+        global df3
+        df3 = parse_data(contents, filename)
+        return html.Div(['Select Node Data: ', html.A(filename)])
+    else:
+        return html.Div(['Select Node Data: ', html.A('file')])
 
 
 if __name__ == "__main__":
