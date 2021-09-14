@@ -111,19 +111,19 @@ limit_settings = dbc.Row(
                 id='limits',
                 options=[
                     {'label': "none", 'value': 0},
-                    {'label': "#1", 'value': 1},
-                    {'label': "#2", 'value': 2},
-                    {'label': "#3", 'value': 3},
+                    {'label': "Data Set #1", 'value': 1},
+                    {'label': "Data Set #2", 'value': 2},
+                    {'label': "Data Set #3", 'value': 3},
 
                 ],
                 value=0
             ),
         ),
         dbc.Col(
-            dbc.Input(id="up_limit", placeholder="Upper Limit", type="number")
+            dbc.Input(id="up_limit", placeholder="Scale Max", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="low_limit", placeholder="Lower Limit", type="number")
+            dbc.Input(id="low_limit", placeholder="Scale Min", type="number")
         ),
     ]
 )
