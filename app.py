@@ -21,7 +21,6 @@ import plotly.express as px
 from matplotlib import cm
 
 
-
 class Diagram:
     def __init__(self, diagram_path):
         diagram_path = Path(diagram_path)
@@ -72,6 +71,9 @@ figure = go.Figure(
 global df1
 global df2
 global df3
+global df1_edge
+global df2_edge
+global df3_edge
 default_stylesheet = []
 # stylesheet = [
 #     {
@@ -128,7 +130,7 @@ limit_settings = dbc.Row(
     ]
 )
 
-graph_settings1 = dbc.Row(
+node_settings1 = dbc.Row(
     [
         dbc.Col(
             dcc.Upload(
@@ -138,17 +140,17 @@ graph_settings1 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base1", placeholder="Base", type="number")
+            dbc.Input(id="base1", placeholder="base", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="up_limit1", placeholder="Upper Limit (p.u.)", type="number")
+            dbc.Input(id="up_limit1", placeholder="max", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="low_limit1", placeholder="Lower Limit (p.u.)", type="number")
+            dbc.Input(id="low_limit1", placeholder="min", type="number")
         ),
     ]
 )
-graph_settings2 = dbc.Row(
+node_settings2 = dbc.Row(
     [
         dbc.Col(
             dcc.Upload(
@@ -158,18 +160,17 @@ graph_settings2 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base2", placeholder="Base", type="number")
+            dbc.Input(id="base2", placeholder="base", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="up_limit2", placeholder="Upper Limit (p.u.)", type="number")
+            dbc.Input(id="up_limit2", placeholder="max", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="low_limit2", placeholder="Lower Limit (p.u.)", type="number")
+            dbc.Input(id="low_limit2", placeholder="min", type="number")
         ),
     ]
 )
-
-graph_settings3 = dbc.Row(
+node_settings3 = dbc.Row(
     [
         dbc.Col(
             dcc.Upload(
@@ -179,13 +180,73 @@ graph_settings3 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base3", placeholder="Base", type="number")
+            dbc.Input(id="base3", placeholder="base", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="up_limit3", placeholder="Upper Limit (p.u.)", type="number")
+            dbc.Input(id="up_limit3", placeholder="max", type="number")
         ),
         dbc.Col(
-            dbc.Input(id="low_limit3", placeholder="Lower Limit (p.u.)", type="number")
+            dbc.Input(id="low_limit3", placeholder="min", type="number")
+        ),
+    ]
+)
+edge_settings1 = dbc.Row(
+    [
+        dbc.Col(
+            dcc.Upload(
+                id='import_edge1',
+                children=html.Div(['Data: ', html.A('select')]),
+                multiple=False
+            ),
+        ),
+        dbc.Col(
+            dbc.Input(id="base_edge1", placeholder="base", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="up_limit_edge1", placeholder="max", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="low_limit_edge1", placeholder="min", type="number")
+        ),
+    ]
+)
+edge_settings2 = dbc.Row(
+    [
+        dbc.Col(
+            dcc.Upload(
+                id='import_edge2',
+                children=html.Div(['Data: ', html.A('select')]),
+                multiple=False
+            ),
+        ),
+        dbc.Col(
+            dbc.Input(id="base_edge2", placeholder="base", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="up_limit_edge2", placeholder="max", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="low_limit_edge2", placeholder="min", type="number")
+        ),
+    ]
+)
+edge_settings3 = dbc.Row(
+    [
+        dbc.Col(
+            dcc.Upload(
+                id='import_edge3',
+                children=html.Div(['Data: ', html.A('select')]),
+                multiple=False
+            ),
+        ),
+        dbc.Col(
+            dbc.Input(id="base_edge3", placeholder="base", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="up_limit_edge3", placeholder="max", type="number")
+        ),
+        dbc.Col(
+            dbc.Input(id="low_limit_edge3", placeholder="min", type="number")
         ),
     ]
 )
@@ -193,6 +254,25 @@ app.layout = html.Div(
     [
         dbc.Row(
             [
+                # dbc.Col(
+                #     [
+                #         dbc.Row(
+                #             [
+                #                 dbc.Card(
+                #                     [
+                #                         dcc.Graph(
+                #                             id="histogram",
+                #                             figure=figure,
+                #                             # config={'frameMargins': 0}
+                #                         )
+                #                     ],
+                #                     className='w-100'
+                #                 ),
+                #             ]
+                #         ),
+                #
+                #     ]
+                # ),
                 dbc.Col(
                     [
                         dbc.Row(
@@ -274,7 +354,7 @@ app.layout = html.Div(
                             [
                                 dbc.Card(
                                     [
-                                        graph_settings1,
+                                        node_settings1,
                                         dcc.Graph(
                                             id="node_graph1",
                                             figure=figure,
@@ -289,7 +369,7 @@ app.layout = html.Div(
                             [
                                 dbc.Card(
                                     [
-                                        graph_settings2,
+                                        node_settings2,
                                         dcc.Graph(
                                             id="node_graph2",
                                             figure=figure,
@@ -304,7 +384,7 @@ app.layout = html.Div(
                             [
                                 dbc.Card(
                                     [
-                                        graph_settings3,
+                                        node_settings3,
                                         dcc.Graph(
                                             id="node_graph3",
                                             figure=figure,
@@ -316,7 +396,57 @@ app.layout = html.Div(
                             ]
                         ),
                     ],
-                    width="5"
+                    width="3"
+                ),
+                dbc.Col(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        edge_settings1,
+                                        dcc.Graph(
+                                            id="edge_graph1",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        edge_settings2,
+                                        dcc.Graph(
+                                            id="edge_graph2",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
+                        ),
+                        dbc.Row(
+                            [
+                                dbc.Card(
+                                    [
+                                        edge_settings3,
+                                        dcc.Graph(
+                                            id="edge_graph3",
+                                            figure=figure,
+                                            # config={'frameMargins': 0}
+                                        )
+                                    ],
+                                    className='w-100'
+                                ),
+                            ]
+                        ),
+                    ],
+                    width="3"
                 ),
             ]
         ),
@@ -510,7 +640,7 @@ def update_stylesheet(t, limits, vmax, vmin,
             norm = mpcolor.Normalize(vmin, vmax)
             cmap = cm.get_cmap('viridis', 512)
             for key in df.keys():
-                if df[key].max()/base > up_limit:
+                if df[key][t]/base > up_limit:
                     new_styles.append(
                         {
                             'selector': f'node[label = "{key.replace("node_", "")}"]',
@@ -524,7 +654,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                             }
                         }
                     )
-                elif df[key].min()/base < low_limit and df[key].min() != 0:
+                elif df[key][t]/base < low_limit and df[key].min() != 0:
                     new_styles.append(
                         {
                             'selector': f'node[label = "{key.replace("node_", "")}"]',
@@ -537,7 +667,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                             }
                         }
                     )
-                elif df[key].min()/base > low_limit and df[key].max()/base < up_limit:
+                elif df[key][t]/base > low_limit and df[key][t]/base < up_limit:
                     new_styles.append(
                         {
                             'selector': f'node[label = "{key.replace("node_", "")}"]',
@@ -703,6 +833,141 @@ def update_graph3(nodedata, base3):
     return figure
 
 
+@app.callback(
+    Output('edge_graph1', 'figure'), [
+    Input("cytoscape", "selectedEdgeData"),
+    Input('base_edge1', 'value')
+    ]
+)
+def update_edge_graph1(edgedata, base):
+    if base is None:
+        base = 1
+    if edgedata is not None and df1_edge is not None:
+        if len(edgedata) > 0:
+            fig_data = []
+            for data in edgedata:
+                page='IEEE123'
+                data['source']
+                from_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
+                to_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['target']}']").attrib.get('value')
+                key = f'oh_line_{from_bus}_{to_bus}'
+                df = df1_edge
+                if key not in df.keys():
+                    key = f'oh_line_{to_bus}_{from_bus}'
+                y = np.array(df[key])/base
+                x = np.array(range(0, len(y)))
+                fig_data.append(
+                    go.Scatter(
+                        x=x,
+                        y=y,
+                        name=key.replace('oh_line_', ''),
+                        mode='lines+markers')
+                )
+            return go.Figure(
+                fig_data,
+                layout=go.Layout(
+                    height=250,
+                    margin={'t': 5, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
+                    showlegend=True
+                )
+            )
+    return figure
+
+
+@app.callback(
+    Output('edge_graph2', 'figure'), [
+    Input("cytoscape", "selectedEdgeData"),
+    Input('base_edge2', 'value')
+    ]
+)
+def update_edge_graph1(edgedata, base):
+    if base is None:
+        base = 1
+    if edgedata is not None and df2_edge is not None:
+        if len(edgedata) > 0:
+            fig_data = []
+            for data in edgedata:
+                page='IEEE123'
+                data['source']
+                from_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
+                to_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['target']}']").attrib.get('value')
+                key = f'oh_line_{from_bus}_{to_bus}'
+                df = df2_edge
+                if key not in df.keys():
+                    key = f'oh_line_{to_bus}_{from_bus}'
+                y = np.array(df[key])/base
+                x = np.array(range(0, len(y)))
+                fig_data.append(
+                    go.Scatter(
+                        x=x,
+                        y=y,
+                        name=key.replace('oh_line_', ''),
+                        mode='lines+markers')
+                )
+            return go.Figure(
+                fig_data,
+                layout=go.Layout(
+                    height=250,
+                    margin={'t': 5, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
+                    showlegend=True
+                )
+            )
+    return figure
+
+
+@app.callback(
+    Output('edge_graph3', 'figure'), [
+    Input("cytoscape", "selectedEdgeData"),
+    Input('base_edge3', 'value')
+    ]
+)
+def update_edge_graph1(edgedata, base):
+    if base is None:
+        base = 1
+    if edgedata is not None and df3_edge is not None:
+        if len(edgedata) > 0:
+            fig_data = []
+            for data in edgedata:
+                page='IEEE123'
+                data['source']
+                from_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
+                to_bus = diagram.tree.find(
+                    f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['target']}']").attrib.get('value')
+                key = f'oh_line_{from_bus}_{to_bus}'
+                df = df3_edge
+                if key not in df.keys():
+                    key = f'oh_line_{to_bus}_{from_bus}'
+                y = np.array(df[key])/base
+                x = np.array(range(0, len(y)))
+                fig_data.append(
+                    go.Scatter(
+                        x=x,
+                        y=y,
+                        name=key.replace('oh_line_', ''),
+                        mode='lines+markers')
+                )
+            return go.Figure(
+                fig_data,
+                layout=go.Layout(
+                    height=250,
+                    margin={'t': 5, 'l': 5, 'b': 5, 'r': 5},
+                    # plot_bgcolor=colors["graphBackground"],
+                    # paper_bgcolor=colors["graphBackground"],
+                    showlegend=True
+                )
+            )
+    return figure
+
+
 # @app.callback(
 #     Output('edge_graph', 'figure'), [
 #     Input("cytoscape", "selectedEdgeData")
@@ -786,6 +1051,58 @@ def import_data3(contents, filename):
     else:
         return html.Div(['Data: ', html.A('select')])
 
+
+@app.callback(
+    Output('import_edge1', 'children'),
+    [
+    Input('import_edge1', 'contents'),
+    Input('import_edge1', 'filename'),
+    ]
+)
+def import_edge_data1(contents, filename):
+    if contents is not None:
+        contents = contents
+        filename = filename
+        global df1_edge
+        df1_edge = parse_data(contents, filename)
+        return html.Div([html.A(filename)])
+    else:
+        return html.Div(['Data: ', html.A('select')])
+
+@app.callback(
+    Output('import_edge2', 'children'),
+    [
+    Input('import_edge2', 'contents'),
+    Input('import_edge2', 'filename'),
+    ]
+)
+def import_edge_data2(contents, filename):
+    if contents is not None:
+        contents = contents
+        filename = filename
+        global df2_edge
+        df2_edge = parse_data(contents, filename)
+        return html.Div([html.A(filename)])
+    else:
+        return html.Div(['Data: ', html.A('select')])
+
+
+@app.callback(
+    Output('import_edge3', 'children'),
+    [
+    Input('import_edge3', 'contents'),
+    Input('import_edge3', 'filename'),
+    ]
+)
+def import_edge_data3(contents, filename):
+    if contents is not None:
+        contents = contents
+        filename = filename
+        global df3_edge
+        df3_edge = parse_data(contents, filename)
+        return html.Div([html.A(filename)])
+    else:
+        return html.Div(['Data: ', html.A('select')])
 
 if __name__ == "__main__":
     app.run_server(debug=False)
