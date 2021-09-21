@@ -9,6 +9,11 @@ In the future it will be generalized to be more flexible.
 
 To run this app first clone repository and then open a terminal to the app folder.
 
+```
+git clone https://github.com/nathantgray/ResultsViewer.git
+cd ResultsViewer
+```
+
 Create and activate a new virtual environment (recommended) by running
 the following:
 
