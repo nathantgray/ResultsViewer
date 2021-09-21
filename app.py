@@ -68,12 +68,12 @@ figure = go.Figure(
                     # plot_bgcolor=colors["graphBackground"],
                     # paper_bgcolor=colors["graphBackground"]
                 ))
-global df1
-global df2
-global df3
-global df1_edge
-global df2_edge
-global df3_edge
+df1 = None
+df2 = None
+df3 = None
+df1_edge = None
+df2_edge = None
+df3_edge = None
 default_stylesheet = []
 # stylesheet = [
 #     {
@@ -593,18 +593,40 @@ def show_page(page):
                Input('low_limit2', 'value'),
                Input('base3', 'value'),
                Input('up_limit3', 'value'),
-               Input('low_limit3', 'value')],
-                prevent_initial_callbacks=True
+               Input('low_limit3', 'value'),
+               Input('base_edge1', 'value'),
+               Input('up_limit_edge1', 'value'),
+               Input('low_limit_edge1', 'value'),
+               Input('base_edge2', 'value'),
+               Input('up_limit_edge2', 'value'),
+               Input('low_limit_edge2', 'value'),
+               Input('base_edge3', 'value'),
+               Input('up_limit_edge3', 'value'),
+               Input('low_limit_edge3', 'value')],
+              prevent_initial_callbacks=True
               )
 def update_stylesheet(t, limits, vmax, vmin,
                       base1, up_limit1, low_limit1,
                       base2, up_limit2, low_limit2,
-                      base3, up_limit3, low_limit3):
+                      base3, up_limit3, low_limit3,
+                      base_edge1, up_limit_edge1, low_limit_edge1,
+                      base_edge2, up_limit_edge2, low_limit_edge2,
+                      base_edge3, up_limit_edge3, low_limit_edge3):
+    global df1
+    global df2
+    global df3
+    global df1_edge
+    global df2_edge
+    global df3_edge
     new_styles = []
     df = None
-    up_limit = None
-    low_limit = None
+    df_edge = None
+    up_limit = 1e9
+    low_limit = -1e9
     base = 1
+    up_limit_edge = 1e9
+    low_limit_edge = -1e9
+    base_edge = 1
     if t is None:
         t = 0
 
@@ -616,22 +638,44 @@ def update_stylesheet(t, limits, vmax, vmin,
             up_limit = up_limit1
             low_limit = low_limit1
             base = base1
+
+            df_edge = df1_edge
+            up_limit_edge = up_limit_edge1
+            low_limit_edge = low_limit_edge1
+            base_edge = base_edge1
         if limits == 2:
             df = df2
             up_limit = up_limit2
             low_limit = low_limit2
             base = base2
+
+            df_edge = df2_edge
+            up_limit_edge = up_limit_edge2
+            low_limit_edge = low_limit_edge2
+            base_edge = base_edge2
         if limits == 3:
             df = df3
             up_limit = up_limit3
             low_limit = low_limit3
             base = base3
+
+            df_edge = df3_edge
+            up_limit_edge = up_limit_edge3
+            low_limit_edge = low_limit_edge3
+            base_edge = base_edge3
+
         if base is None:
             base = 1
         if low_limit is None:
-            low_limit = 0
+            low_limit = -1e9
         if up_limit is None:
-            up_limit = 100000000
+            up_limit = 1e9
+        if base_edge is None:
+            base_edge = 1
+        if low_limit_edge is None:
+            low_limit_edge = -1e9
+        if up_limit_edge is None:
+            up_limit_edge = 1e9
         if df is not None:
             if vmax is None:
                 vmax = np.max(np.array([df[key].max() for key in df.keys() if df[key].max() is not None]))/base
@@ -680,7 +724,6 @@ def update_stylesheet(t, limits, vmax, vmin,
                             }
                         }
                     )
-
                 if df[key].max() == 0:
                     new_styles.append(
                         {
@@ -694,6 +737,33 @@ def update_stylesheet(t, limits, vmax, vmin,
                             }
                         }
                     )
+        if df_edge is not None:
+            for edge_key in df_edge.keys():
+                edge_string = edge_key.replace('oh_line_', '')
+                from_to = edge_string.split('_')
+                from_value = int(from_to[0])
+                to_value = int(from_to[1])
+                from_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{from_value}']").attrib.get('id')
+                to_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{to_value}']").attrib.get('id')
+                edge_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{to_id}']")
+                new_styles.append(
+                    {
+                        'selector': f'{edge_id}',
+                        'style': {
+                            # 'source-arrow-color': '',
+                            # 'source-arrow-shape': 'vee',
+                            'mid-target-arrow-shape': 'triangle',
+                            'mid-target-arrow-color': 'blue',
+                            'arrow-scale': 3,
+                            'line-color': 'black',
+                            # "source-endpoint": "inside-to-node",
+                            # "target-endpoint": "inside-to-node",
+
+                        }
+                    }
+                )
+                # print(edge_key)
+
 
     return default_stylesheet + new_styles
 
@@ -846,8 +916,7 @@ def update_edge_graph1(edgedata, base):
         if len(edgedata) > 0:
             fig_data = []
             for data in edgedata:
-                page='IEEE123'
-                data['source']
+                page = 'IEEE123'  # TODO: update_edge_graph1 needs to get page name
                 from_bus = diagram.tree.find(
                     f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
                 to_bus = diagram.tree.find(
