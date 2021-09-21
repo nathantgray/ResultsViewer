@@ -46,7 +46,7 @@ class Diagram:
     # def get_page_list(self):
     #     return self.page_list
 
-app = dash.Dash(external_stylesheets=[dbc.themes.LUX])
+app = dash.Dash(external_stylesheets=[dbc.themes.YETI])
 
 # colors = {"graphBackground": "#F5F5F5", "background": "#ffffff", "text": "#000000"}
 PATH = Path(__file__).parent
@@ -74,37 +74,17 @@ df3 = None
 df1_edge = None
 df2_edge = None
 df3_edge = None
-default_stylesheet = []
-# stylesheet = [
-#     {
-#         "selector": ".nonterminal",
-#         "style": {
-#             "label": "data(confidence)",
-#             "background-opacity": 0,
-#             "text-halign": "left",
-#             "text-valign": "top",
-#         },
-#     },
-#     {"selector": ".support", "style": {"background-opacity": 0}},
-#     {
-#         "selector": "edge",
-#         "style": {
-#             "source-endpoint": "inside-to-node",
-#             "target-endpoint": "inside-to-node",
-#         },
-#     },
-#     {
-#         "selector": ".terminal",
-#         "style": {
-#             "label": "data(name)",
-#             "width": 10,
-#             "height": 10,
-#             "text-valign": "center",
-#             "text-halign": "right",
-#             "background-color": "#222222",
-#         },
-#     },
-# ]
+default_stylesheet = [
+    {
+        'selector': 'node',
+        'style': {
+            'label': 'data(label)',
+            "text-valign": "top",
+            "text-halign": "left",
+        }
+    }
+]
+
 
 limit_settings = dbc.Row(
     [
@@ -325,7 +305,7 @@ app.layout = html.Div(
                         cyto.Cytoscape(
                             id="cytoscape",
                             elements=diagram.elements,
-                            # stylesheet=stylesheet,
+                            stylesheet=default_stylesheet,
                             layout={"name": "preset", "fit": True, "animate": True},
                             style={
                                 "height": "650px",
@@ -333,7 +313,7 @@ app.layout = html.Div(
                                 # "backgroundColor": "white",
                                 "margin": "auto",
                             },
-                            minZoom=0.3,
+                            minZoom=0.35,
                         ),
 
                         dcc.Slider(
@@ -629,6 +609,7 @@ def update_stylesheet(t, limits, vmax, vmin,
     base_edge = 1
     if t is None:
         t = 0
+    flow_max = None
 
     # cmap = px.colors.sequential.solar
 
@@ -738,30 +719,85 @@ def update_stylesheet(t, limits, vmax, vmin,
                         }
                     )
         if df_edge is not None:
+            if flow_max is None:
+                flow_max = np.max(np.array([df_edge[key].max() for key in df_edge.keys() if df_edge[key].max() is not None]))/base_edge
             for edge_key in df_edge.keys():
+                print(edge_key)
+                flow = df_edge[edge_key][t]/base_edge
+                scale = 4*np.sqrt(np.abs(flow)/flow_max)
                 edge_string = edge_key.replace('oh_line_', '')
                 from_to = edge_string.split('_')
                 from_value = int(from_to[0])
                 to_value = int(from_to[1])
                 from_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{from_value}']").attrib.get('id')
                 to_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{to_value}']").attrib.get('id')
-                edge_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{to_id}']")
-                new_styles.append(
-                    {
-                        'selector': f'{edge_id}',
-                        'style': {
-                            # 'source-arrow-color': '',
-                            # 'source-arrow-shape': 'vee',
-                            'mid-target-arrow-shape': 'triangle',
-                            'mid-target-arrow-color': 'blue',
-                            'arrow-scale': 3,
-                            'line-color': 'black',
-                            # "source-endpoint": "inside-to-node",
-                            # "target-endpoint": "inside-to-node",
+                edge_mx = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{to_id}']")
+                if scale > 1e-6:
+                    if edge_mx is None or edge_mx.attrib.get('source') != from_id:
+                        # edge direction is reversed
+                        edge_mx = diagram.tree.find(
+                            f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{from_id}']")
+                        if flow < 0:
+                            new_styles.append(
+                                {
+                                    # 'selector': f'edge[id="{edge_mx.attrib.get("id")}"]',
+                                    'selector': f"edge[target = '{from_id}']",
+                                    'style': {
+                                        'mid-target-arrow-shape': 'vee',
+                                        'mid-target-arrow-color': 'blue',
+                                        'arrow-scale': f'{scale}',
+                                        'line-color': 'black',
+                                        "source-endpoint": "outside-to-node",
+                                        "target-endpoint": "outside-to-node",
 
-                        }
-                    }
-                )
+                                    }
+                                }
+                            )
+                        else:
+                            new_styles.append(
+                                {
+                                    # 'selector': f'edge[id="{edge_mx.attrib.get("id")}"]',
+                                    'selector': f"edge[target = '{from_id}']",
+                                    'style': {
+                                        'mid-source-arrow-shape': 'vee',
+                                        'mid-source-arrow-color': 'blue',
+                                        'arrow-scale': f'{scale}',
+                                        'line-color': 'black',
+                                        "source-endpoint": "outside-to-node",
+                                        "target-endpoint": "outside-to-node",
+
+                                    }
+                                }
+                            )
+                    else:
+                        if flow < 0:
+                            new_styles.append(
+                                {
+                                    # 'selector': f'edge[id="{edge_mx.attrib.get("id")}"]',
+                                    'selector': f"[target = '{to_id}']",
+                                    'style': {
+                                        'mid-source-arrow-shape': 'vee',
+                                        'mid-source-arrow-color': 'blue',
+                                        'arrow-scale': f'{scale}',
+                                        'line-color': 'black',
+
+                                    }
+                                }
+                            )
+                        else:
+                            new_styles.append(
+                                {
+                                    # 'selector': f'edge[id="{edge_mx.attrib.get("id")}"]',
+                                    'selector': f"[target = '{to_id}']",
+                                    'style': {
+                                        'mid-target-arrow-shape': 'vee',
+                                        'mid-target-arrow-color': 'blue',
+                                        'arrow-scale': f'{scale}',
+                                        'line-color': 'black',
+
+                                    }
+                                }
+                            )
                 # print(edge_key)
 
 
