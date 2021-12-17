@@ -119,15 +119,9 @@ node_settings1 = dbc.Row(
                 multiple=False
             ),
         ),
-        dbc.Col(
-            dbc.Input(id="base1", placeholder="base", type="number")
-        ),
-        dbc.Col(
-            dbc.Input(id="up_limit1", placeholder="max", type="number")
-        ),
-        dbc.Col(
-            dbc.Input(id="low_limit1", placeholder="min", type="number")
-        ),
+        dbc.Col(dbc.Input(id="base1", placeholder="base", type="number", value=2401.7771198288433)),
+        dbc.Col(dbc.Input(id="up_limit1", placeholder="max", type="number", value=1.05)),
+        dbc.Col(dbc.Input(id="low_limit1", placeholder="min", type="number", value=0.95)),
     ]
 )
 node_settings2 = dbc.Row(
@@ -140,13 +134,13 @@ node_settings2 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base2", placeholder="base", type="number")
+            dbc.Input(id="base2", placeholder="base", type="number", value=2401.7771198288433)
         ),
         dbc.Col(
-            dbc.Input(id="up_limit2", placeholder="max", type="number")
+            dbc.Input(id="up_limit2", placeholder="max", type="number", value=1.05)
         ),
         dbc.Col(
-            dbc.Input(id="low_limit2", placeholder="min", type="number")
+            dbc.Input(id="low_limit2", placeholder="min", type="number", value=0.95)
         ),
     ]
 )
@@ -160,13 +154,13 @@ node_settings3 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base3", placeholder="base", type="number")
+            dbc.Input(id="base3", placeholder="base", type="number", value=2401.7771198288433)
         ),
         dbc.Col(
-            dbc.Input(id="up_limit3", placeholder="max", type="number")
+            dbc.Input(id="up_limit3", placeholder="max", type="number", value=1.05)
         ),
         dbc.Col(
-            dbc.Input(id="low_limit3", placeholder="min", type="number")
+            dbc.Input(id="low_limit3", placeholder="min", type="number", value=0.95)
         ),
     ]
 )
@@ -824,7 +818,12 @@ def parse_data(contents, filename):
 
     return df_import
 
-
+# @app.callback(
+#     Output('node_graph1', 'figure'), [
+#     Input("cytoscape", "selectedNodeData"),
+#     Input('base1', 'value')
+#     ]
+# )
 @app.callback(
     Output('node_graph1', 'figure'), [
     Input("cytoscape", "selectedNodeData"),

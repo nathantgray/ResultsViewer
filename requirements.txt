@@ -4,3 +4,4 @@ numpy
 dash-cytoscape
 dash
 dash_bootstrap_components
+matplotlib
