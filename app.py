@@ -1,3 +1,4 @@
+#! venv/bin/python
 import math
 import dash
 import plotly.express as px
@@ -74,6 +75,7 @@ df3 = None
 df1_edge = None
 df2_edge = None
 df3_edge = None
+# node_prefix = 'node_'
 default_stylesheet = [
     {
         'selector': 'node',
@@ -85,6 +87,23 @@ default_stylesheet = [
     }
 ]
 
+setup_settings = dbc.Row(
+    [
+        dbc.Col(
+            dcc.Dropdown(
+                id='page_list',
+                options=diagram.page_list,
+                value=list(diagram.page_list[0].values())[0], persistence=True, persistence_type='local'
+            ),
+        ),
+        dbc.Col(
+            html.Div(id='node_prefix_input_box_label', children='Node prefix:')
+        ),
+        dbc.Col(
+            dbc.Input(id="node_prefix", placeholder="node_", value="node_", persistence=True, persistence_type='local')
+        )
+    ]
+)
 
 limit_settings = dbc.Row(
     [
@@ -98,14 +117,14 @@ limit_settings = dbc.Row(
                     {'label': "Data Set #3", 'value': 3},
 
                 ],
-                value=0
+                value=0, persistence=True, persistence_type='local'
             ),
         ),
         dbc.Col(
-            dbc.Input(id="up_limit", placeholder="Scale Max", type="number")
+            dbc.Input(id="up_limit", placeholder="Scale Max", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit", placeholder="Scale Min", type="number")
+            dbc.Input(id="low_limit", placeholder="Scale Min", type="number", persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -119,9 +138,9 @@ node_settings1 = dbc.Row(
                 multiple=False
             ),
         ),
-        dbc.Col(dbc.Input(id="base1", placeholder="base", type="number", value=2401.7771198288433)),
-        dbc.Col(dbc.Input(id="up_limit1", placeholder="max", type="number", value=1.05)),
-        dbc.Col(dbc.Input(id="low_limit1", placeholder="min", type="number", value=0.95)),
+        dbc.Col(dbc.Input(id="base1", placeholder="base", type="number", value=2401.7771198288433, persistence=True, persistence_type='local')),
+        dbc.Col(dbc.Input(id="up_limit1", placeholder="max", type="number", value=1.05, persistence=True, persistence_type='local')),
+        dbc.Col(dbc.Input(id="low_limit1", placeholder="min", type="number", value=0.95, persistence=True, persistence_type='local')),
     ]
 )
 node_settings2 = dbc.Row(
@@ -134,13 +153,13 @@ node_settings2 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base2", placeholder="base", type="number", value=2401.7771198288433)
+            dbc.Input(id="base2", placeholder="base", type="number", value=2401.7771198288433, persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="up_limit2", placeholder="max", type="number", value=1.05)
+            dbc.Input(id="up_limit2", placeholder="max", type="number", value=1.05, persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit2", placeholder="min", type="number", value=0.95)
+            dbc.Input(id="low_limit2", placeholder="min", type="number", value=0.95, persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -154,13 +173,13 @@ node_settings3 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base3", placeholder="base", type="number", value=2401.7771198288433)
+            dbc.Input(id="base3", placeholder="base", type="number", value=2401.7771198288433, persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="up_limit3", placeholder="max", type="number", value=1.05)
+            dbc.Input(id="up_limit3", placeholder="max", type="number", value=1.05, persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit3", placeholder="min", type="number", value=0.95)
+            dbc.Input(id="low_limit3", placeholder="min", type="number", value=0.95, persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -174,13 +193,13 @@ edge_settings1 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base_edge1", placeholder="base", type="number")
+            dbc.Input(id="base_edge1", placeholder="base", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="up_limit_edge1", placeholder="max", type="number")
+            dbc.Input(id="up_limit_edge1", placeholder="max", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit_edge1", placeholder="min", type="number")
+            dbc.Input(id="low_limit_edge1", placeholder="min", type="number", persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -194,13 +213,13 @@ edge_settings2 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base_edge2", placeholder="base", type="number")
+            dbc.Input(id="base_edge2", placeholder="base", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="up_limit_edge2", placeholder="max", type="number")
+            dbc.Input(id="up_limit_edge2", placeholder="max", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit_edge2", placeholder="min", type="number")
+            dbc.Input(id="low_limit_edge2", placeholder="min", type="number", persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -214,13 +233,13 @@ edge_settings3 = dbc.Row(
             ),
         ),
         dbc.Col(
-            dbc.Input(id="base_edge3", placeholder="base", type="number")
+            dbc.Input(id="base_edge3", placeholder="base", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="up_limit_edge3", placeholder="max", type="number")
+            dbc.Input(id="up_limit_edge3", placeholder="max", type="number", persistence=True, persistence_type='local')
         ),
         dbc.Col(
-            dbc.Input(id="low_limit_edge3", placeholder="min", type="number")
+            dbc.Input(id="low_limit_edge3", placeholder="min", type="number", persistence=True, persistence_type='local')
         ),
     ]
 )
@@ -290,11 +309,7 @@ app.layout = html.Div(
                                 ), width='auto'),
                             ]
                         ),
-                        dcc.Dropdown(
-                            id='page_list',
-                            options=diagram.page_list,
-                            value=list(diagram.page_list[0].values())[0]
-                        ),
+                        setup_settings,
                         limit_settings,
                         cyto.Cytoscape(
                             id="cytoscape",
@@ -473,6 +488,10 @@ def color_for_val(val, vmin, vmax, pl_colorscale):
 def display_value(value):
     return f'{value}'
 
+# @app.callback(Input('node_prefix', 'value'))
+# def get_node_prefix(prefix):
+#     global node_prefix
+#     node_prefix = prefix
 
 @app.callback(
     Output("node-data", "children"), [Input("cytoscape", "selectedNodeData")]
@@ -553,10 +572,32 @@ def update_upload_text(filename):
 def show_page(page):
     return drawio2cytoscape(diagram.tree, page=page)
 
+@app.callback(Output('slider', 'max'),
+              [Input('limits', 'value')])
+def update_slider_range(data_selector):
+    global df1
+    global df2
+    global df3
+    df = None
+    length = 60
+
+    # cmap = px.colors.sequential.solar
+
+    if 0 < data_selector < 4:
+        if data_selector == 1:
+            df = df1
+        if data_selector == 2:
+            df = df2
+        if data_selector == 3:
+            df = df3
+        length = df.shape[0]
+    return length
+
 
 @app.callback(Output('cytoscape', 'stylesheet'),
               [Input('slider', 'value'),
                Input('limits', 'value'),
+               Input('node_prefix', 'value'),
                Input('up_limit', 'value'),
                Input('low_limit', 'value'),
                Input('base1', 'value'),
@@ -576,16 +617,19 @@ def show_page(page):
                Input('low_limit_edge2', 'value'),
                Input('base_edge3', 'value'),
                Input('up_limit_edge3', 'value'),
-               Input('low_limit_edge3', 'value')],
+               Input('low_limit_edge3', 'value'),
+               Input("page_list", "value")],
               prevent_initial_callbacks=True
               )
-def update_stylesheet(t, limits, vmax, vmin,
+def update_stylesheet(t, limits, node_prefix, vmax, vmin,
                       base1, up_limit1, low_limit1,
                       base2, up_limit2, low_limit2,
                       base3, up_limit3, low_limit3,
                       base_edge1, up_limit_edge1, low_limit_edge1,
                       base_edge2, up_limit_edge2, low_limit_edge2,
-                      base_edge3, up_limit_edge3, low_limit_edge3):
+                      base_edge3, up_limit_edge3, low_limit_edge3,
+                      page):
+    # global node_prefix
     global df1
     global df2
     global df3
@@ -604,6 +648,8 @@ def update_stylesheet(t, limits, vmax, vmin,
     if t is None:
         t = 0
     flow_max = None
+    if node_prefix is None:
+        node_prefix = 'node_'
 
     # cmap = px.colors.sequential.solar
 
@@ -662,7 +708,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                 if df[key][t]/base > up_limit:
                     new_styles.append(
                         {
-                            'selector': f'node[label = "{key.replace("node_", "")}"]',
+                            'selector': f'node[label = "{key.replace(node_prefix, "")}"]',
                             'style': {
                                 'shape': 'triangle',
                                 'border-width': 3,
@@ -676,7 +722,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                 elif df[key][t]/base < low_limit and df[key].min() != 0:
                     new_styles.append(
                         {
-                            'selector': f'node[label = "{key.replace("node_", "")}"]',
+                            'selector': f'node[label = "{key.replace(node_prefix, "")}"]',
                             'style': {
                                 'shape': 'square',
                                 'border-width': 3,
@@ -689,7 +735,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                 elif df[key][t]/base > low_limit and df[key][t]/base < up_limit:
                     new_styles.append(
                         {
-                            'selector': f'node[label = "{key.replace("node_", "")}"]',
+                            'selector': f'node[label = "{key.replace(node_prefix, "")}"]',
                             'style': {
                                 'shape': 'ellipse',
                                 'border-width': 3,
@@ -702,7 +748,7 @@ def update_stylesheet(t, limits, vmax, vmin,
                 if df[key].max() == 0:
                     new_styles.append(
                         {
-                            'selector': f'node[label = "{key.replace("node_", "")}"]',
+                            'selector': f'node[label = "{key.replace(node_prefix, "")}"]',
                             'style': {
                                 'shape': 'ellipse',
                                 # 'border-width': 1,
@@ -719,18 +765,18 @@ def update_stylesheet(t, limits, vmax, vmin,
                 print(edge_key)
                 flow = df_edge[edge_key][t]/base_edge
                 scale = 4*np.sqrt(np.abs(flow)/flow_max)
-                edge_string = edge_key.replace('oh_line_', '')
-                from_to = edge_string.split('_')
-                from_value = int(from_to[0])
-                to_value = int(from_to[1])
-                from_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{from_value}']").attrib.get('id')
-                to_id = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@value='{to_value}']").attrib.get('id')
-                edge_mx = diagram.tree.find(f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{to_id}']")
+                # edge_string = edge_key.replace('oh_line_', '')
+                from_to = edge_key.split('_')[-2:]
+                from_value = from_to[0]  # int(from_to[0])
+                to_value = from_to[1]  # int(from_to[1])
+                from_id = diagram.tree.find(f"./diagram[@name={page}]/mxGraphModel/root/mxCell[@value='{from_value}']").attrib.get('id')
+                to_id = diagram.tree.find(f"./diagram[@name={page}]/mxGraphModel/root/mxCell[@value='{to_value}']").attrib.get('id')
+                edge_mx = diagram.tree.find(f"./diagram[@name={page}]/mxGraphModel/root/mxCell[@target='{to_id}']")
                 if scale > 1e-6:
                     if edge_mx is None or edge_mx.attrib.get('source') != from_id:
                         # edge direction is reversed
                         edge_mx = diagram.tree.find(
-                            f"./diagram[@name='IEEE123']/mxGraphModel/root/mxCell[@target='{from_id}']")
+                            f"./diagram[@name={page}]/mxGraphModel/root/mxCell[@target='{from_id}']")
                         if flow < 0:
                             new_styles.append(
                                 {
@@ -827,20 +873,23 @@ def parse_data(contents, filename):
 @app.callback(
     Output('node_graph1', 'figure'), [
     Input("cytoscape", "selectedNodeData"),
-    Input('base1', 'value')
+    Input('base1', 'value'),
+    Input('node_prefix', 'value')
     ]
 )
-def update_graph1(nodedata, base1):
+def update_graph1(nodedata, base1, node_prefix):
     base = 1
     if base1 is not None:
         base = base1
+    if node_prefix is None:
+        node_prefix = 'node_'
     if nodedata is not None and df1 is not None:
         if len(nodedata) > 0:
             fig_data = []
             for data in nodedata:
                 node_name = data["label"]
                 df = df1
-                y = np.array(df[f'node_{node_name}'])/base
+                y = np.array(df[f'{node_prefix}{node_name}'])/base
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
@@ -865,20 +914,23 @@ def update_graph1(nodedata, base1):
 @app.callback(
     Output('node_graph2', 'figure'), [
     Input("cytoscape", "selectedNodeData"),
-    Input('base2', 'value')
+    Input('base2', 'value'),
+    Input('node_prefix', 'value')
     ]
 )
-def update_graph2(nodedata, base2):
+def update_graph2(nodedata, base2, node_prefix):
     base = 1
     if base2 is not None:
         base = base2
+    if node_prefix is None:
+        node_prefix = 'node_'
     if nodedata is not None and df2 is not None:
         if len(nodedata) > 0:
             fig_data = []
             for data in nodedata:
                 node_name = data["label"]
                 df = df2
-                y = np.array(df[f'node_{node_name}'])/base
+                y = np.array(df[f'{node_prefix}{node_name}'])/base
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
@@ -903,20 +955,23 @@ def update_graph2(nodedata, base2):
 @app.callback(
     Output('node_graph3', 'figure'), [
     Input("cytoscape", "selectedNodeData"),
-    Input('base3', 'value')
+    Input('base3', 'value'),
+    Input('node_prefix', 'value')
     ]
 )
-def update_graph3(nodedata, base3):
+def update_graph3(nodedata, base3, node_prefix):
     base = 1
     if base3 is not None:
         base = base3
+    if node_prefix is None:
+        node_prefix = 'node_'
     if nodedata is not None and df3 is not None:
         if len(nodedata) > 0:
             fig_data = []
             for data in nodedata:
                 node_name = data["label"]
                 df = df3
-                y = np.array(df[f'node_{node_name}'])/base
+                y = np.array(df[f'{node_prefix}{node_name}'])/base
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
@@ -941,32 +996,39 @@ def update_graph3(nodedata, base3):
 @app.callback(
     Output('edge_graph1', 'figure'), [
     Input("cytoscape", "selectedEdgeData"),
-    Input('base_edge1', 'value')
+    Input('base_edge1', 'value'),
+    Input("page_list", "value")
+
     ]
 )
-def update_edge_graph1(edgedata, base):
+def update_edge_graph1(edgedata, base, page):
     if base is None:
         base = 1
     if edgedata is not None and df1_edge is not None:
         if len(edgedata) > 0:
             fig_data = []
             for data in edgedata:
-                page = 'IEEE123'  # TODO: update_edge_graph1 needs to get page name
                 from_bus = diagram.tree.find(
                     f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
                 to_bus = diagram.tree.find(
                     f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['target']}']").attrib.get('value')
-                key = f'oh_line_{from_bus}_{to_bus}'
+                # key = f'oh_line_{from_bus}_{to_bus}'
                 df = df1_edge
-                if key not in df.keys():
-                    key = f'oh_line_{to_bus}_{from_bus}'
-                y = np.array(df[key])/base
+                edge_key = None
+                for key in df.keys():
+                    if f'{from_bus}_{to_bus}' in key:
+                        edge_key = key
+                        break
+
+                # if key not in df.keys():
+                #     key = f'oh_line_{to_bus}_{from_bus}'
+                y = np.array(df[edge_key])/base
                 x = np.array(range(0, len(y)))
                 fig_data.append(
                     go.Scatter(
                         x=x,
                         y=y,
-                        name=key.replace('oh_line_', ''),
+                        name=f'{from_bus}-{to_bus}',
                         mode='lines+markers')
                 )
             return go.Figure(
@@ -985,17 +1047,18 @@ def update_edge_graph1(edgedata, base):
 @app.callback(
     Output('edge_graph2', 'figure'), [
     Input("cytoscape", "selectedEdgeData"),
-    Input('base_edge2', 'value')
+    Input('base_edge2', 'value'),
+    Input("page_list", "value")
     ]
 )
-def update_edge_graph1(edgedata, base):
+def update_edge_graph1(edgedata, base, page):
     if base is None:
         base = 1
     if edgedata is not None and df2_edge is not None:
         if len(edgedata) > 0:
             fig_data = []
             for data in edgedata:
-                page='IEEE123'
+                # page='IEEE123'
                 data['source']
                 from_bus = diagram.tree.find(
                     f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
@@ -1030,17 +1093,18 @@ def update_edge_graph1(edgedata, base):
 @app.callback(
     Output('edge_graph3', 'figure'), [
     Input("cytoscape", "selectedEdgeData"),
-    Input('base_edge3', 'value')
+    Input('base_edge3', 'value'),
+    Input("page_list", "value")
     ]
 )
-def update_edge_graph1(edgedata, base):
+def update_edge_graph1(edgedata, base, page):
     if base is None:
         base = 1
     if edgedata is not None and df3_edge is not None:
         if len(edgedata) > 0:
             fig_data = []
             for data in edgedata:
-                page='IEEE123'
+                # page='IEEE123'
                 data['source']
                 from_bus = diagram.tree.find(
                     f"./diagram[@name='{page}']/mxGraphModel/root/mxCell[@id='{data['source']}']").attrib.get('value')
