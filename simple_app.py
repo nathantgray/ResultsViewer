@@ -1,5 +1,6 @@
 #! /home/nathangray/PycharmProjects/ResultsViewer/venv310/bin/python3.10
 from dash import Dash, dcc, html, Input, Output
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 import io
@@ -7,12 +8,12 @@ import base64
 from math import sqrt
 
 
-app = Dash(__name__)
+app = Dash(external_stylesheets=[dbc.themes.YETI])
 df = px.data.stocks()
 base = sqrt(3)
-# df = pd.DataFrame  # replace with your own data source
-options = list(df.iloc[0, 1:].keys())
-print(options)
+df = pd.DataFrame  # replace with your own data source
+# options = list(df.iloc[0, 1:].keys())
+# print(options)
 app.layout = html.Div([
     html.H4('Dataframe plotter'),
     dcc.Upload(id='uploader',
@@ -23,7 +24,7 @@ app.layout = html.Div([
     dcc.Input(id="base_input", placeholder="Base", type="number", persistence=True, persistence_type='local'),
     dcc.Dropdown(
         id="ticker",
-        options=options,
+        # options=options,
         # value=options[0],
         clearable=False,
         multi=True
@@ -42,10 +43,10 @@ app.layout = html.Div([
     ]
 )
 def import_data1(contents, filename):
+    global df, options
     if contents is not None:
         contents = contents
         filename = filename
-        global df, options
         df = parse_data(contents, filename)
         options = list(df.iloc[0, 1:].keys())
         return options, html.Div([html.A(filename)])
@@ -61,10 +62,13 @@ def import_data1(contents, filename):
     ]
 )
 def display_time_series(ticker, base):
+    global df
     print(ticker)
     _df = df.copy()
     _df[ticker] = df[ticker]/(base/sqrt(3))
-    fig = px.line(_df, y=ticker)
+    fig = px.line(_df, y=ticker, labels={'variable': 'Node'})
+    fig.update_xaxes(title_text="Time (s)")
+    fig.update_yaxes(title_text="Voltage (p.u.)")
     return fig
 
 def parse_data(contents, filename):
